@@ -1,112 +1,181 @@
 <!DOCTYPE html>
-<!-- redeploy -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10 Second Challenge</title>
+<title>The 10 Second Challenge</title>
 <style>
+  :root {
+    --accent: #818cf8;
+    --accent2: #c084fc;
+    --bg1: #0f172a;
+    --bg2: #1e1b4b;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: radial-gradient(circle at top, #1e293b, #0f172a);
-    color: #f1f5f9;
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e2e8f0;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 24px;
+    overflow: hidden;
+    background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #0f172a);
+    background-size: 400% 400%;
+    animation: bgShift 18s ease infinite;
+  }
+  @keyframes bgShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .blob {
+    position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; z-index: 0;
+    pointer-events: none;
+  }
+  .blob.a { width: 380px; height: 380px; background: #6366f1; top: -120px; left: -100px; }
+  .blob.b { width: 420px; height: 420px; background: #a855f7; bottom: -140px; right: -120px; }
+  .card {
+    position: relative; z-index: 1;
+    width: min(440px, 100%);
+    padding: 40px 32px 36px;
     text-align: center;
-    padding: 20px;
+    background: rgba(30, 27, 75, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 28px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.45);
   }
-  h1 { font-size: 2rem; margin-bottom: 8px; }
-  p.sub { color: #94a3b8; margin-bottom: 30px; max-width: 420px; }
-  #timer {
-    font-size: 4.5rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 30px;
-    letter-spacing: 2px;
-  }
+  h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px;
+    background: linear-gradient(90deg, #c7d2fe, #f0abfc);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  p.sub { color: #94a3b8; font-size: 0.92rem; line-height: 1.5; margin: 0 auto 28px; max-width: 320px; }
+  p.sub strong { color: #e9d5ff; }
+  .dial { position: relative; width: 230px; height: 230px; margin: 0 auto 8px; }
+  svg.ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  svg.ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+  .ring-bg { stroke: rgba(148,163,184,0.15); }
+  .ring-fg { stroke: url(#grad); transition: stroke-dashoffset 0.05s linear; }
   #btn {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    border: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    background: linear-gradient(145deg, #6366f1, #4f46e5);
-    box-shadow: 0 10px 30px rgba(79,70,229,0.5);
-    transition: transform 0.08s ease, box-shadow 0.2s ease;
+    position: absolute; inset: 26px;
+    border-radius: 50%; border: none; cursor: pointer;
+    font-size: 1.35rem; font-weight: 800; letter-spacing: 1px; color: #fff;
+    background: radial-gradient(circle at 35% 30%, #818cf8, #6d28d9);
+    box-shadow: 0 0 0 0 rgba(129,140,248,0.5), 0 12px 30px rgba(91,33,182,0.55);
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
   }
-  #btn:hover { box-shadow: 0 14px 40px rgba(79,70,229,0.7); }
-  #btn:active { transform: scale(0.94); }
-  #btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  #result { margin-top: 28px; font-size: 1.25rem; min-height: 30px; font-weight: 600; }
-  .perfect { color: #22c55e; }
-  .close { color: #eab308; }
-  .far { color: #ef4444; }
-  #best { margin-top: 10px; color: #94a3b8; font-size: 0.95rem; }
+  #btn.idle { animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(129,140,248,0.45), 0 12px 30px rgba(91,33,182,0.55); }
+    70% { box-shadow: 0 0 0 22px rgba(129,140,248,0), 0 12px 30px rgba(91,33,182,0.55); }
+    100% { box-shadow: 0 0 0 0 rgba(129,140,248,0), 0 12px 30px rgba(91,33,182,0.55); }
+  }
+  #btn:hover { transform: scale(1.04); }
+  #btn:active { transform: scale(0.95); }
+  #btn.running { background: radial-gradient(circle at 35% 30%, #f472b6, #be185d); animation: none; }
+  #readout { font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-top: 18px; min-height: 24px;
+    font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+  #result { margin-top: 14px; font-size: 1.3rem; font-weight: 800; min-height: 34px;
+    opacity: 0; transform: translateY(8px); transition: opacity 0.35s ease, transform 0.35s ease; }
+  #result.show { opacity: 1; transform: translateY(0); }
+  .perfect { color: #4ade80; text-shadow: 0 0 18px rgba(74,222,128,0.5); }
+  .close { color: #facc15; }
+  .far { color: #fb7185; }
+  #best { margin-top: 16px; font-size: 0.85rem; color: #64748b; letter-spacing: 0.3px; }
+  #best b { color: #a5b4fc; }
 </style>
 </head>
 <body>
-  <h1>⏱️ The 10 Second Challenge</h1>
-  <p class="sub">Click START, then press STOP exactly when the timer hits <strong>10.00</strong> seconds. The timer hides while running — trust your gut!</p>
-  <div id="timer">0.00</div>
-  <button id="btn">START</button>
-  <div id="result"></div>
-  <div id="best"></div>
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="card">
+    <h1>The 10&#8209;Second Challenge</h1>
+    <p class="sub">Hit <strong>START</strong>, then tap <strong>STOP</strong> the instant you feel <strong>10.00s</strong> have passed. The clock hides while it runs &mdash; trust your gut.</p>
+    <div class="dial">
+      <svg class="ring" viewBox="0 0 230 230">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#818cf8"/>
+            <stop offset="100%" stop-color="#e879f9"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="115" cy="115" r="105"></circle>
+        <circle class="ring-fg" cx="115" cy="115" r="105"></circle>
+      </svg>
+      <button id="btn" class="idle">START</button>
+    </div>
+    <div id="readout">Ready when you are</div>
+    <div id="result"></div>
+    <div id="best"></div>
+  </div>
 
 <script>
   const btn = document.getElementById('btn');
-  const timerEl = document.getElementById('timer');
+  const readout = document.getElementById('readout');
   const resultEl = document.getElementById('result');
   const bestEl = document.getElementById('best');
+  const ring = document.querySelector('.ring-fg');
   const TARGET = 10;
+  const R = 105;
+  const CIRC = 2 * Math.PI * R;
+  ring.style.strokeDasharray = CIRC;
+  ring.style.strokeDashoffset = CIRC;
 
-  let state = 'idle'; // idle | running
+  let state = 'idle';
   let startTime = 0;
   let rafId = null;
-  let best = null;
+  let best = localStorage.getItem('best10') ? parseFloat(localStorage.getItem('best10')) : null;
+  renderBest();
 
-  function update() {
+  function renderBest() {
+    bestEl.innerHTML = best === null ? 'No attempts yet' : 'Best: <b>' + best.toFixed(2) + 's</b> off target';
+  }
+
+  function tick() {
     const elapsed = (performance.now() - startTime) / 1000;
-    // Hide the live number to make it a real challenge
-    timerEl.textContent = '?.??';
-    rafId = requestAnimationFrame(update);
+    const frac = Math.min(elapsed / TARGET, 1);
+    ring.style.strokeDashoffset = CIRC * (1 - frac);
+    readout.textContent = 'counting\u2026';
+    rafId = requestAnimationFrame(tick);
   }
 
   function startGame() {
     state = 'running';
     startTime = performance.now();
     btn.textContent = 'STOP';
-    resultEl.textContent = '';
+    btn.classList.remove('idle');
+    btn.classList.add('running');
     resultEl.className = '';
-    rafId = requestAnimationFrame(update);
+    resultEl.textContent = '';
+    readout.textContent = 'counting\u2026';
+    rafId = requestAnimationFrame(tick);
   }
 
   function stopGame() {
     cancelAnimationFrame(rafId);
     state = 'idle';
     const elapsed = (performance.now() - startTime) / 1000;
-    timerEl.textContent = elapsed.toFixed(2);
+    readout.textContent = 'You stopped at ' + elapsed.toFixed(2) + 's';
     const diff = Math.abs(elapsed - TARGET);
     let msg, cls;
-    if (diff < 0.1) { msg = '🎯 PERFECT! ' + diff.toFixed(2) + 's off'; cls = 'perfect'; }
-    else if (diff < 0.5) { msg = '🔥 So close! ' + diff.toFixed(2) + 's off'; cls = 'close'; }
-    else { msg = (elapsed > TARGET ? 'Too slow! ' : 'Too fast! ') + diff.toFixed(2) + 's off'; cls = 'far'; }
+    if (diff < 0.1) { msg = '\ud83c\udfaf PERFECT \u2014 ' + diff.toFixed(2) + 's off!'; cls = 'perfect'; }
+    else if (diff < 0.5) { msg = '\ud83d\udd25 So close! ' + diff.toFixed(2) + 's off'; cls = 'close'; }
+    else { msg = (elapsed > TARGET ? '\ud83d\udc22 Too slow \u2014 ' : '\u26a1 Too fast \u2014 ') + diff.toFixed(2) + 's off'; cls = 'far'; }
     resultEl.textContent = msg;
-    resultEl.className = cls;
-    if (best === null || diff < best) { best = diff; }
-    bestEl.textContent = 'Best so far: ' + best.toFixed(2) + 's off target';
-    btn.textContent = 'PLAY AGAIN';
+    resultEl.className = cls + ' show';
+    if (best === null || diff < best) { best = diff; localStorage.setItem('best10', best); }
+    renderBest();
+    btn.textContent = 'AGAIN';
+    btn.classList.remove('running');
+    btn.classList.add('idle');
+    ring.style.strokeDashoffset = CIRC;
   }
 
   btn.addEventListener('click', () => {
-    if (state === 'idle') startGame();
-    else stopGame();
+    if (state === 'idle') startGame(); else stopGame();
   });
 </script>
 </body>
