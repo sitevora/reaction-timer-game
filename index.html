@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Second Challenge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top, #1e293b, #0f172a);
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+  }
+  h1 { font-size: 2rem; margin-bottom: 8px; }
+  p.sub { color: #94a3b8; margin-bottom: 30px; max-width: 420px; }
+  #timer {
+    font-size: 4.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+  }
+  #btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(145deg, #6366f1, #4f46e5);
+    box-shadow: 0 10px 30px rgba(79,70,229,0.5);
+    transition: transform 0.08s ease, box-shadow 0.2s ease;
+  }
+  #btn:hover { box-shadow: 0 14px 40px rgba(79,70,229,0.7); }
+  #btn:active { transform: scale(0.94); }
+  #btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #result { margin-top: 28px; font-size: 1.25rem; min-height: 30px; font-weight: 600; }
+  .perfect { color: #22c55e; }
+  .close { color: #eab308; }
+  .far { color: #ef4444; }
+  #best { margin-top: 10px; color: #94a3b8; font-size: 0.95rem; }
+</style>
+</head>
+<body>
+  <h1>⏱️ The 10 Second Challenge</h1>
+  <p class="sub">Click START, then press STOP exactly when the timer hits <strong>10.00</strong> seconds. The timer hides while running — trust your gut!</p>
+  <div id="timer">0.00</div>
+  <button id="btn">START</button>
+  <div id="result"></div>
+  <div id="best"></div>
+
+<script>
+  const btn = document.getElementById('btn');
+  const timerEl = document.getElementById('timer');
+  const resultEl = document.getElementById('result');
+  const bestEl = document.getElementById('best');
+  const TARGET = 10;
+
+  let state = 'idle'; // idle | running
+  let startTime = 0;
+  let rafId = null;
+  let best = null;
+
+  function update() {
+    const elapsed = (performance.now() - startTime) / 1000;
+    // Hide the live number to make it a real challenge
+    timerEl.textContent = '?.??';
+    rafId = requestAnimationFrame(update);
+  }
+
+  function startGame() {
+    state = 'running';
+    startTime = performance.now();
+    btn.textContent = 'STOP';
+    resultEl.textContent = '';
+    resultEl.className = '';
+    rafId = requestAnimationFrame(update);
+  }
+
+  function stopGame() {
+    cancelAnimationFrame(rafId);
+    state = 'idle';
+    const elapsed = (performance.now() - startTime) / 1000;
+    timerEl.textContent = elapsed.toFixed(2);
+    const diff = Math.abs(elapsed - TARGET);
+    let msg, cls;
+    if (diff < 0.1) { msg = '🎯 PERFECT! ' + diff.toFixed(2) + 's off'; cls = 'perfect'; }
+    else if (diff < 0.5) { msg = '🔥 So close! ' + diff.toFixed(2) + 's off'; cls = 'close'; }
+    else { msg = (elapsed > TARGET ? 'Too slow! ' : 'Too fast! ') + diff.toFixed(2) + 's off'; cls = 'far'; }
+    resultEl.textContent = msg;
+    resultEl.className = cls;
+    if (best === null || diff < best) { best = diff; }
+    bestEl.textContent = 'Best so far: ' + best.toFixed(2) + 's off target';
+    btn.textContent = 'PLAY AGAIN';
+  }
+
+  btn.addEventListener('click', () => {
+    if (state === 'idle') startGame();
+    else stopGame();
+  });
+</script>
+</body>
+</html>
